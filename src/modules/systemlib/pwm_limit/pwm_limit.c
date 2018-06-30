@@ -152,40 +152,42 @@ void pwm_limit_calc(const bool armed, const bool pre_armed, const unsigned num_c
 					continue;
 				}
 
-				uint16_t ramp_min_pwm;
+				//uint16_t ramp_min_pwm;
 
 				/* if a disarmed pwm value was set, blend between disarmed and min */
 				if (disarmed_pwm[i] > 0) {
 
 					/* safeguard against overflows */
-					unsigned disarmed = disarmed_pwm[i];
+					//unsigned disarmed = disarmed_pwm[i];
 
-					if (disarmed > min_pwm[i]) {
-						disarmed = min_pwm[i];
-					}
+					//if (disarmed > min_pwm[i]) {
+						//disarmed = min_pwm[i];
+					//}
 
-					unsigned disarmed_min_diff = min_pwm[i] - disarmed;
-					ramp_min_pwm = disarmed + (disarmed_min_diff * progress) / PROGRESS_INT_SCALING;
+					//unsigned disarmed_min_diff = min_pwm[i] - disarmed;
+					//ramp_min_pwm = disarmed + (disarmed_min_diff * progress) / PROGRESS_INT_SCALING;
 
-				} else {
+				} //else {
 
 					/* no disarmed pwm value set, choose min pwm */
-					ramp_min_pwm = min_pwm[i];
-				}
+					//ramp_min_pwm = min_pwm[i];
+				//}
 
 				if (reverse_mask & (1 << i)) {
 					control_value = -1.0f * control_value;
 				}
 
-				effective_pwm[i] = control_value * (max_pwm[i] - ramp_min_pwm) / 2 + (max_pwm[i] + ramp_min_pwm) / 2;
+				// Custom
+				effective_pwm[i] = (max_pwm[i] + min_pwm[i]) / 2;
+				//
 
 				/* last line of defense against invalid inputs */
-				if (effective_pwm[i] < ramp_min_pwm) {
-					effective_pwm[i] = ramp_min_pwm;
+				//if (effective_pwm[i] < ramp_min_pwm) {
+				//	effective_pwm[i] = ramp_min_pwm;
 
-				} else if (effective_pwm[i] > max_pwm[i]) {
-					effective_pwm[i] = max_pwm[i];
-				}
+				//} else if (effective_pwm[i] > max_pwm[i]) {
+					//effective_pwm[i] = max_pwm[i];
+				//}
 			}
 		}
 		break;
