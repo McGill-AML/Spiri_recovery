@@ -379,6 +379,18 @@ MulticopterAttitudeControl::control_attitude(float dt)
 	Quatf q(_v_att.q);
 	Quatf qd(_v_att_sp.q_d);
 
+	/////////////
+	// Custom: rotate desired attitude quaternion 180 degrees around x axis for inverted flight
+	Quatf q_flip(0.0f,1.0f,0.0f,0.0f);
+
+	/*if (int(_manual_control_sp.aux2) == 0) {
+		qd = qd*q_flip;
+	}
+	else {
+		qd = qd;
+	}*/
+	////////////
+
 	/* ensure input quaternions are exactly normalized because acosf(1.00001) == NaN */
 	q.normalize();
 	qd.normalize();
