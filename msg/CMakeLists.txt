@@ -128,6 +128,12 @@ set(msg_files
 	vehicle_status_flags.msg
 	vtol_vehicle_status.msg
 	wind_estimate.msg
+	debug.msg
+	impact_characterization.msg
+	impact_detection.msg
+	impact_recovery_stage.msg
+	recovery_control.msg
+	control_state.msg
 	)
 
 if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
