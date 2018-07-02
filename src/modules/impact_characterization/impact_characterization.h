@@ -30,8 +30,10 @@
 #include <systemlib/systemlib.h>
 #include <systemlib/err.h>
 
+
+
 //fuzzy logic libraries
-#include <lib/eFLL/Fuzzy.h>
+/*#include <lib/eFLL/Fuzzy.h>
 #include <lib/eFLL/FuzzyComposition.h>
 #include <lib/eFLL/FuzzyInput.h>
 #include <lib/eFLL/FuzzyIO.h>
@@ -39,7 +41,7 @@
 #include <lib/eFLL/FuzzyRule.h>
 #include <lib/eFLL/FuzzyRuleAntecedent.h>
 #include <lib/eFLL/FuzzyRuleConsequent.h>
-#include <lib/eFLL/FuzzySet.h>
+#include <lib/eFLL/FuzzySet.h>*/
 
 #define QUATQUEUESIZE 5
 #define PREIMPACTCYCLES 2

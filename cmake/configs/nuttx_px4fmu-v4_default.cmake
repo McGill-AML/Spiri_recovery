@@ -118,6 +118,7 @@ set(config_module_list
 	#
 	modules/dataman
 
+	#lib/eFLL
 
 	#
 	# OBC challenge

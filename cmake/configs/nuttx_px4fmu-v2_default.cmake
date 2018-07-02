@@ -119,10 +119,13 @@ set(config_module_list
 	#
 	# Vehicle Control
 	#
-	modules/fw_att_control
-	modules/fw_pos_control_l1
+	#modules/fw_att_control
+	#modules/fw_pos_control_l1
 	#modules/gnd_att_control
 	#modules/gnd_pos_control
+	modules/impact_detection
+	modules/impact_characterization
+	modules/recovery_stage
 	modules/mc_att_control
 	modules/mc_pos_control
 	modules/vtol_att_control

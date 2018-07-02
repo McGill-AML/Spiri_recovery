@@ -1,11 +1,13 @@
 #include <modules/impact_characterization/impact_characterization.h>
-/*#include <modules/impact_characterization/Fuzzy.h> 
+
+#include <modules/impact_characterization/Fuzzy.h> 
 #include <modules/impact_characterization/FuzzySet.h> 
 #include <modules/impact_characterization/FuzzyInput.h> 
-#include <modules/impact_characterization/FuzzyInput.h> 
+#include <modules/impact_characterization/FuzzyIO.h> 
 #include <modules/impact_characterization/FuzzyOutput.h> 
 #include <modules/impact_characterization/FuzzyRuleConsequent.h>  
-#include <modules/impact_characterization/FuzzyRuleAntecedent.h> */
+#include <modules/impact_characterization/FuzzyRuleAntecedent.h> 
+
 void init_flp_params(Fuzzy*& fuzzy);
 
 void init_flp_params(Fuzzy* &fuzzy){ // to call: init_flp_params(fuzzy);

@@ -42,9 +42,9 @@ mc_att_control start
 
 mc_pos_control start
 
-impact_characterization start
-
 impact_detection start
+
+impact_characterization start
 
 recovery_stage start
 

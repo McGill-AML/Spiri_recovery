@@ -6,6 +6,14 @@ px4_add_module(
 	SRCS
 		initialize_fuzzylogicprocess.cpp
 		impact_characterization.cpp
+		Fuzzy.h
+		FuzzySet.h
+		FuzzyInput.h
+		FuzzyIO.h
+		FuzzyOutput.h
+		FuzzyRuleConsequent.h
+		FuzzyRuleAntecedent.h
+		
 	DEPENDS
 		platforms__common
 	)
