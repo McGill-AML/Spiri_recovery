@@ -196,7 +196,7 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	}
 	else if (int(_manual_control_sp.aux2) == 0){
 	}*/
-	thrust = 0.5f + thrust/2.0f;
+	//thrust = 0.5f + thrust/2.0f;
 
 	// clean out class variable used to capture saturation
 	_saturation_status.value = 0;
