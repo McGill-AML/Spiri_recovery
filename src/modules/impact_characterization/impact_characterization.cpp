@@ -9,19 +9,21 @@
  * @author2 Fiona Chui<fiona.m.chui@gmail.com>
  */
 #include <modules/impact_characterization/impact_characterization.h> 
-#include <modules/impact_characterization/initialize_fuzzylogicprocess.cpp> 
 
-#include <modules/impact_characterization/Fuzzy.h> 
-#include <modules/impact_characterization/FuzzySet.h> 
-#include <modules/impact_characterization/FuzzyInput.h> 
-#include <modules/impact_characterization/FuzzyIO.h> 
-#include <modules/impact_characterization/FuzzyOutput.h> 
-#include <modules/impact_characterization/FuzzyRuleConsequent.h>  
-#include <modules/impact_characterization/FuzzyRuleAntecedent.h> 
-
+/*#include <lib/eFLL/Fuzzy.h>
+#include <lib/eFLL/FuzzySet.h> 
+#include <lib/eFLL/FuzzyInput.h> 
+#include <lib/eFLL/FuzzyIO.h> 
+#include <lib/eFLL/FuzzyOutput.h> 
+#include <lib/eFLL/FuzzyRuleConsequent.h>  
+#include <lib/eFLL/FuzzyRuleAntecedent.h>*/
 
 
 // CLASS FUNCTIONS
+
+extern "C" __EXPORT int impact_characterization_main(int argc, char *argv[]);
+
+
  QuaternionQueue::QuaternionQueue()
 {
 	head = tail = 0;
@@ -209,8 +211,8 @@ int impact_characterization_thread_main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////
 
 	/////////////// INITIALIZE FUZZY LOGIC PROCESS /////////////
-	Fuzzy* fuzzy = new Fuzzy();
-	init_flp_params(fuzzy);
+	//Fuzzy* fuzzy = new Fuzzy();
+	//init_flp_params(fuzzy);
 	
     ////////////////////////////////////////////////////////////
 
@@ -274,12 +276,12 @@ int impact_characterization_thread_main(int argc, char *argv[])
 							if(fuzzyInputCalcCycleDelay_array[iInput] <= cyclesAfterImpactDetected ){ //calculation delays required for some inputs
 								if (iInput == 0){  //accelerometer horizontal magnitude
 									math::Vector<2> accelHorizontalComponents(_sensor_accel.x,_sensor_accel.y);
-									_characterization.fuzzyInput[0] = accelHorizontalComponents.length()/9.81f;
-									fuzzy->setInput(1,_characterization.fuzzyInput[0]);
+									//_characterization.fuzzyInput[0] = accelHorizontalComponents.length()/9.81f;
+									//fuzzy->setInput(1,_characterization.fuzzyInput[0]);
 									fuzzyInputCalculated_array[iInput] = 1;
 								}
 								else if (iInput == 1){  //inclination
-									math::Vector<3> wallTangentWorld = crossProduct(inertialFrameGravityDirection,wallNormal_vect);
+									/*math::Vector<3> wallTangentWorld = crossProduct(inertialFrameGravityDirection,wallNormal_vect);
 									math::Vector<3> rotatedNegBodyZ = R_preImpact*bodyFrameNegGravityDirection;
 									math::Vector<3> bodyZProjection = rotatedNegBodyZ-wallTangentWorld*(rotatedNegBodyZ*wallTangentWorld); //check dot product
 									float dotProductWithWorldZ = bodyZProjection*inertialFrameNegGravityDirection;
@@ -287,46 +289,46 @@ int impact_characterization_thread_main(int argc, char *argv[])
 
 									float dotProductWithWorldNormal = bodyZProjection*wallNormal_vect;
 									float angleWithWorldNormal = acosf(dotProductWithWorldNormal/(bodyZProjection.length()*wallNormal_vect.length()));
-									float inclinationSign = signf(angleWithWorldNormal - (float)M_PI/2);
+									float inclinationSign = signf(angleWithWorldNormal - (float)M_PI/2);*/
 
-									_characterization.fuzzyInput[1] = inclinationSign*rad2deg(inclinationAngle);
+									//_characterization.fuzzyInput[1] = inclinationSign*rad2deg(inclinationAngle);
 
-									fuzzy->setInput(2, _characterization.fuzzyInput[1] );
+									//fuzzy->setInput(2, _characterization.fuzzyInput[1] );
 									fuzzyInputCalculated_array[iInput] = 1;
 								}
 								else if (iInput == 2){  //flipping direction angle
-									math::Matrix<3, 3> R = q_att.to_dcm();
+									/*math::Matrix<3, 3> R = q_att.to_dcm();
 									math::Vector<3> gyro(_sensor_gyro.x,_sensor_gyro.y,_sensor_gyro.z);
 									math::Vector<3> angVelWorld = R*gyro;
 									math::Vector<3> angVelWorldPerp = crossProduct(angVelWorld,inertialFrameNegGravityDirection);
 									math::Vector<2> angVelWorldPerpHoriz(angVelWorldPerp(0),angVelWorldPerp(1));
-									math::Vector<2> wallNormalWorldHoriz(wallNormal_vect(0),wallNormal_vect(1));
-									_characterization.fuzzyInput[2] = rad2deg(acosf((angVelWorldPerpHoriz*wallNormalWorldHoriz)/(angVelWorldPerpHoriz.length()*wallNormalWorldHoriz.length())));
+									math::Vector<2> wallNormalWorldHoriz(wallNormal_vect(0),wallNormal_vect(1));*/
+									//_characterization.fuzzyInput[2] = rad2deg(acosf((angVelWorldPerpHoriz*wallNormalWorldHoriz)/(angVelWorldPerpHoriz.length()*wallNormalWorldHoriz.length())));
 							
-									fuzzy->setInput(3, _characterization.fuzzyInput[2]);
+									//fuzzy->setInput(3, _characterization.fuzzyInput[2]);
 									fuzzyInputCalculated_array[iInput] = 1;
 								}
 								else if (iInput == 3){  //gyro horizontal magnitude
 									math::Vector<2> gyroHorizontalComponents(_sensor_gyro.x,_sensor_gyro.y);
-									_characterization.fuzzyInput[3] = gyroHorizontalComponents.length();
-									fuzzy->setInput(4,_characterization.fuzzyInput[3]);
+									//_characterization.fuzzyInput[3] = gyroHorizontalComponents.length();
+									//fuzzy->setInput(4,_characterization.fuzzyInput[3]);
 									fuzzyInputCalculated_array[iInput] = 1;
 								}
 							}
 						}
 
-					} // end fuzzyInput calculation for loop
+					} // end fuzzyInput calculation for loop 
 
 					int sum = 0;
 					for(auto& num : fuzzyInputCalculated_array)   sum += num;
 					if(sum == 4){ //check all four fuzzy inputs have been calculated
 					   
 						// calculate fuzzy output
-						fuzzy->fuzzify();
-						_characterization.fuzzyOutput = fuzzy->defuzzify(1);
+						//fuzzy->fuzzify();
+						//_characterization.fuzzyOutput = fuzzy->defuzzify(1);
 
 						//# TODO: confirm with Gareth accelRef calculation
-						math::Vector<3> accelReference_vect = wallNormal_vect*(-0.75f*9.81f*_characterization.fuzzyOutput);
+						math::Vector<3> accelReference_vect = wallNormal_vect*(-0.75f*9.81f);
 						// math::Vector<3> accelReference_vect = wallNormal_vect*(9.81f*_characterization.fuzzyOutput);
 						if (_characterization.fuzzyOutput < 0.0f){
 							// accelReference_vect = accelReference_vect/10.0f;
@@ -347,21 +349,23 @@ int impact_characterization_thread_main(int argc, char *argv[])
 
 			//reset condition
 			if (_characterization.accelRefIsComputed && _recovery_stage.recoveryIsReset){
-				cyclesAfterImpactDetected = 0; 
-				fuzzyInputCalculated_array[0] = 0;
+				cyclesAfterImpactDetected = 0;
+
+
+				/*fuzzyInputCalculated_array[0] = 0;
 				fuzzyInputCalculated_array[1] = 0;
 				fuzzyInputCalculated_array[2] = 0;
-				fuzzyInputCalculated_array[3] = 0;
+				fuzzyInputCalculated_array[3] = 0;*/
 
 				wallNormal_vect(0) = 0.0f;
 				wallNormal_vect(1) = 0.0f;
 				wallNormal_vect(2) = 0.0f;
 
-			    _characterization.fuzzyInput[0] = 0.0f;
+			    /*_characterization.fuzzyInput[0] = 0.0f;
 			    _characterization.fuzzyInput[1] = 0.0f;
 			    _characterization.fuzzyInput[2] = 0.0f;
 			    _characterization.fuzzyInput[3] = 0.0f;
-				_characterization.fuzzyOutput = 0.0f;		
+				_characterization.fuzzyOutput = 0.0f;*/		
 			    _characterization.wallNormal[0] = 0.0f;
 			    _characterization.wallNormal[1] = 0.0f;
 			    _characterization.wallNormal[2] = 0.0f;

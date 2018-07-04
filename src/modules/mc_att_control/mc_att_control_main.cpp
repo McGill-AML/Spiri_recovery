@@ -87,7 +87,7 @@
 #include <systemlib/circuit_breaker.h>
 #include <lib/mathlib/mathlib.h>
 #include <lib/geo/geo.h>
-#include <lib/tailsitter_recovery/tailsitter_recovery.h>
+//#include <lib/tailsitter_recovery/tailsitter_recovery.h>
 //custom	
 #include <uORB/topics/impact_recovery_stage.h>		
 #include <uORB/topics/impact_characterization.h>		
