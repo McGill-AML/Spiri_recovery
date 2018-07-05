@@ -56,6 +56,14 @@
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 
+
+//Topics for Recovery Control
+#include <uORB/topics/impact_recovery_stage.h>		
+#include <uORB/topics/impact_characterization.h>		
+#include <uORB/topics/recovery_control.h>
+#include <uORB/topics/control_state.h>
+
+
 /**
  * Multicopter attitude control app start / stop handling function
  */
@@ -107,6 +115,9 @@ private:
 	void		vehicle_motor_limits_poll();
 	void		vehicle_rates_setpoint_poll();
 	void		vehicle_status_poll();
+	void		impact_poll();
+	//Collision recovery
+
 
 	/**
 	 * Attitude controller.
@@ -136,6 +147,10 @@ private:
 	int		_sensor_gyro_sub[MAX_GYRO_COUNT];	/**< gyro data subscription */
 	int		_sensor_correction_sub{-1};	/**< sensor thermal correction subscription */
 	int		_sensor_bias_sub{-1};		/**< sensor in-run bias correction subscription */
+	//Collision recovery
+	int 	_recovery_stage_sub{-1};
+	int 	_characterization_sub{-1};		
+
 
 	unsigned _gyro_count{1};
 	int _selected_gyro{0};
@@ -161,6 +176,12 @@ private:
 	struct sensor_correction_s		_sensor_correction {};	/**< sensor thermal corrections */
 	struct sensor_bias_s			_sensor_bias {};	/**< sensor in-run bias corrections */
 
+	//Collision recovery
+	struct control_state_s				_ctrl_state{};		/**< control state */
+	struct impact_recovery_stage_s 	    _recovery_stage{};		
+	struct impact_characterization_s    _characterization{};		
+	struct recovery_control_s           _recovery_control{};
+
 	MultirotorMixer::saturation_status _saturation_status{};
 
 	perf_counter_t	_loop_perf;			/**< loop performance counter */
@@ -175,6 +196,8 @@ private:
 	matrix::Vector3f _rates_int;			/**< angular rates integral error */
 	float _thrust_sp;				/**< thrust setpoint */
 	matrix::Vector3f _att_control;			/**< attitude control vector */
+	//Collision Recovery
+	matrix::Vector3f _rates_sp_prev;
 
 	matrix::Dcmf _board_rotation;			/**< rotation matrix for the orientation that the board is mounted */
 
