@@ -410,12 +410,14 @@ MulticopterAttitudeControl::control_attitude(float dt)
 		float awayness = 5.66f; //1.72f;
 		math::Vector<3> accelRef(awayness*_characterization.wallNormal[0],awayness*_characterization.wallNormal[1],0.0f);
 
-		math::Quaternion attitudeQuaternion(_ctrl_state.q[0], _ctrl_state.q[1], _ctrl_state.q[2], _ctrl_state.q[3]);
+		//Custom: _v_att instead of _ctrl_state
+		math::Quaternion attitudeQuaternion(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
 		
 		math::Vector<3> rates; // these are the measured body rates
-		rates(0) = _ctrl_state.roll_rate;
-		rates(1) = _ctrl_state.pitch_rate;
-		rates(2) = _ctrl_state.yaw_rate;
+		//Custom: _v_att instead of _ctrl_state
+		rates(0) = _v_att.rollspeed;
+		rates(1) = _v_att.pitchspeed;
+		rates(2) = _v_att.yawspeed;
 
 		math::Vector<3> accelDesired;
 		math::Vector<3> gravity(0.0f, 0.0f, 9.81f);

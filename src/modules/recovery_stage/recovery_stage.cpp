@@ -28,6 +28,8 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/control_state.h>
+//Custom: _v_att instead of _ctrl_state
+#include <uORB/topics/vehicle_attitude.h>
 
 #include <uORB/topics/impact_detection.h>
 #include <uORB/topics/impact_characterization.h>
@@ -116,7 +118,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 
 	// set up subscribers
 	int _sensor_accel_sub = orb_subscribe(ORB_ID(sensor_accel));
-	int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+	//int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+	//Custom:_v_att instead of _ctrl_state	
+	int _v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	int _detection_sub = orb_subscribe(ORB_ID(impact_detection));
 	int _characterization_sub = orb_subscribe(ORB_ID(impact_characterization));
 	int _recovery_control_sub = orb_subscribe(ORB_ID(recovery_control));
@@ -124,7 +128,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 	
 	// declare local copies
 	struct sensor_accel_s            		_sensor_accel;
-	struct control_state_s					  _ctrl_state;
+	//struct control_state_s					  _ctrl_state;
+	//Custom:_v_att instead of _ctrl_state
+	struct vehicle_attitude_s		_v_att;
 	struct impact_detection_s				   _detection;
 	struct impact_characterization_s 	_characterization;
 	struct impact_recovery_stage_s		  _recovery_stage;
@@ -133,7 +139,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 
 	// set them to zero initially
 	memset(&_sensor_accel, 0, sizeof(_sensor_accel));	
-	memset(&_ctrl_state, 0, sizeof(_ctrl_state));
+	//memset(&_ctrl_state, 0, sizeof(_ctrl_state));
+	//Custom:_v_att instead of _ctrl_state
+	memset(&_v_att, 0, sizeof(_v_att));
 	memset(&_detection, 0, sizeof(_detection));
 	memset(&_characterization, 0, sizeof(_characterization));
 	memset(&_recovery_stage, 0, sizeof(_recovery_stage));
@@ -142,7 +150,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 
 	// declare update flags
 	bool updated_sensor_accel;
-	bool updated_ctrl_state;
+	//bool updated_ctrl_state;
+	//Custom: _v_att instead of _ctrl_state
+	bool updated_v_att;
 	bool updated_detection;
 	bool updated_characterization;
 	bool updated_recovery_control;	
@@ -164,7 +174,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 		if (fds[0].revents & POLLIN) {
 	    	// poll for subscription updates
 			orb_check(_sensor_accel_sub, &updated_sensor_accel);
-			orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//Custom: _v_att instead of _ctrl_state
+			orb_check(_v_att_sub, &updated_v_att);
 			orb_check(_detection_sub, &updated_detection);
 			orb_check(_characterization_sub, &updated_characterization);
 			orb_check(_recovery_control_sub, &updated_recovery_control);
@@ -174,8 +186,11 @@ int recovery_stage_thread_main(int argc, char *argv[])
 			if(updated_sensor_accel){
 				orb_copy(ORB_ID(sensor_accel), _sensor_accel_sub, &_sensor_accel);
 			}
-			if(updated_ctrl_state){
+			/*if(updated_ctrl_state){
 				orb_copy(ORB_ID(control_state), _ctrl_state_sub, &_ctrl_state);
+			}*/
+			if (updated_v_att) {
+				orb_copy(ORB_ID(vehicle_attitude), _v_att_sub, &_v_att);
 			}
 			if(updated_detection){
 				orb_copy(ORB_ID(impact_detection), _detection_sub, &_detection);
@@ -192,7 +207,7 @@ int recovery_stage_thread_main(int argc, char *argv[])
 
 			if(_characterization.accelRefIsComputed && _recovery_stage.recoveryIsReset == false){
 
-				math::Quaternion q_att(_ctrl_state.q[0], _ctrl_state.q[1], _ctrl_state.q[2], _ctrl_state.q[3]);
+				math::Quaternion q_att(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
 				math::Vector<3> angles = q_att.to_euler();
 
 
@@ -200,9 +215,9 @@ int recovery_stage_thread_main(int argc, char *argv[])
 				float pitch = angles(1);
 				float quatErrorX = _recovery_control.quatError[1];
 				float quatErrorY = _recovery_control.quatError[2];
-				float rollRate = _ctrl_state.roll_rate;
-				float pitchRate = _ctrl_state.pitch_rate;
-				float yawRate = _ctrl_state.yaw_rate;
+				float rollRate = _v_att.rollspeed;
+				float pitchRate = _v_att.pitchspeed;
+				float yawRate = _v_att.yawspeed;
 				float verticalVelocity = _local_pos.vz;
 
 		        if (_recovery_stage.recoveryStage == 1){

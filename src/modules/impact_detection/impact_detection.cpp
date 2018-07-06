@@ -26,6 +26,9 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/control_state.h>
+//Custom: _v_att instead of _ctrl_state
+#include <uORB/topics/vehicle_attitude.h>
+
 
 #include <uORB/topics/impact_detection.h>
 #include <uORB/topics/impact_recovery_stage.h>
@@ -108,27 +111,35 @@ int impact_detection_thread_main(int argc, char *argv[])
 
 	// set up subscribers
 	int _sensor_accel_sub = orb_subscribe(ORB_ID(sensor_accel));
-	int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+	//int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+	//Custom:_v_att instead of _ctrl_state	
+	int _v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	int _recovery_stage_sub = orb_subscribe(ORB_ID(impact_recovery_stage));
 	int _armed_sub = orb_subscribe(ORB_ID(actuator_armed));
 
 	// declare local copies
 	struct sensor_accel_s             	  _sensor_accel;
-	struct control_state_s					_ctrl_state;
+	//struct control_state_s					_ctrl_state;
+	//Custom:_v_att instead of _ctrl_state
+	struct vehicle_attitude_s		_v_att;
 	struct impact_detection_s 				 _detection;
 	struct impact_recovery_stage_s  	_recovery_stage;
 	struct actuator_armed_s						 _armed;				
 
 	// set them to zero initially
 	memset(&_sensor_accel, 0, sizeof(_sensor_accel));	
-	memset(&_ctrl_state, 0, sizeof(_ctrl_state));
+	//memset(&_ctrl_state, 0, sizeof(_ctrl_state));
+	//Custom:_v_att instead of _ctrl_state
+	memset(&_v_att, 0, sizeof(_v_att));
 	memset(&_detection, 0, sizeof(_detection));
 	memset(&_recovery_stage, 0, sizeof(_recovery_stage));
 	memset(&_armed, 0, sizeof(_armed));
 
 	// declare update flags
 	bool updated_sensor_accel;
-	bool updated_ctrl_state;
+	//bool updated_ctrl_state;
+	//Custom: _v_att instead of _ctrl_state
+	bool updated_v_att;
 	bool updated_recovery_stage;
 	bool updated_armed;
 	bool accel_is_done_spike = true;
@@ -152,7 +163,9 @@ int impact_detection_thread_main(int argc, char *argv[])
 		if (fds[0].revents & POLLIN){		
 		   	// poll for subscription updates
 			orb_check(_sensor_accel_sub, &updated_sensor_accel);
-			orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//Custom: _v_att instead of _ctrl_state
+			orb_check(_v_att_sub, &updated_v_att);
 			orb_check(_recovery_stage_sub, &updated_recovery_stage);
 			orb_check(_armed_sub, &updated_armed);
 			
@@ -160,8 +173,11 @@ int impact_detection_thread_main(int argc, char *argv[])
 			if(updated_sensor_accel){
 				orb_copy(ORB_ID(sensor_accel), _sensor_accel_sub, &_sensor_accel);
 			}
-			if(updated_ctrl_state){
+			/*if(updated_ctrl_state){
 				orb_copy(ORB_ID(control_state), _ctrl_state_sub, &_ctrl_state);
+			}*/
+			if (updated_v_att) {
+				orb_copy(ORB_ID(vehicle_attitude), _v_att_sub, &_v_att);
 			}
 			if(updated_recovery_stage){
 				orb_copy(ORB_ID(impact_recovery_stage), _recovery_stage_sub, &_recovery_stage);
@@ -171,7 +187,7 @@ int impact_detection_thread_main(int argc, char *argv[])
 			}
 
 			math::Vector<3> accel(_sensor_accel.x, _sensor_accel.y, _sensor_accel.z);
-			math::Quaternion q_att(_ctrl_state.q[0], _ctrl_state.q[1], _ctrl_state.q[2], _ctrl_state.q[3]);
+			math::Quaternion q_att(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
 			//get rotation matrix
 			math::Matrix<3, 3> R = q_att.to_dcm();
 			//rotate accelerometer readings into world frame

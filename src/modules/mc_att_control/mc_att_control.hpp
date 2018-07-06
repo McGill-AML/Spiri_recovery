@@ -177,7 +177,6 @@ private:
 	struct sensor_bias_s			_sensor_bias {};	/**< sensor in-run bias corrections */
 
 	//Collision recovery
-	struct control_state_s				_ctrl_state{};		/**< control state */
 	struct impact_recovery_stage_s 	    _recovery_stage{};		
 	struct impact_characterization_s    _characterization{};		
 	struct recovery_control_s           _recovery_control{};
