@@ -69,6 +69,11 @@
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 
+//Collision recovery
+#include <uORB/topics/impact_recovery_stage.h>
+#include <uORB/topics/control_state.h>
+
+
 #include <float.h>
 #include <lib/ecl/geo/geo.h>
 #include <mathlib/mathlib.h>
@@ -150,6 +155,11 @@ private:
 	int		_pos_sp_triplet_sub;		/**< position setpoint triplet */
 	int		_home_pos_sub; 			/**< home position */
 
+	//Collision recovery
+	int 	_ctrl_state_sub;
+	int 	_recovery_stage_sub;
+
+
 	orb_advert_t	_att_sp_pub;			/**< attitude setpoint publication */
 	orb_advert_t	_local_pos_sp_pub;		/**< vehicle local position setpoint publication */
 
@@ -165,6 +175,11 @@ private:
 	struct position_setpoint_triplet_s		_pos_sp_triplet;	/**< vehicle global position setpoint triplet */
 	struct vehicle_local_position_setpoint_s	_local_pos_sp;		/**< vehicle local position setpoint */
 	struct home_position_s				_home_pos; 				/**< home position */
+
+	//Collision recovery
+	struct control_state_s				_ctrl_state;
+	struct impact_recovery_stage_s 	    	_recovery_stage;
+
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::MPC_FLT_TSK>) _test_flight_tasks, /**< temporary flag for the transition to flight tasks */
@@ -441,6 +456,11 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_pos_sp_triplet_sub(-1),
 	_home_pos_sub(-1),
 
+	//Collision recovery
+	_ctrl_state_sub(-1),
+	_recovery_stage_sub(-1),
+	
+
 	/* publications */
 	_att_sp_pub(nullptr),
 	_local_pos_sp_pub(nullptr),
@@ -455,6 +475,9 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_pos_sp_triplet{},
 	_local_pos_sp{},
 	_home_pos{},
+	//Collision recovery
+	_ctrl_state{},
+	
 	_vel_x_deriv(this, "VELD"),
 	_vel_y_deriv(this, "VELD"),
 	_vel_z_deriv(this, "VELD"),
@@ -753,6 +776,14 @@ MulticopterPositionControl::poll_subscriptions()
 	if (updated) {
 		orb_copy(ORB_ID(home_position), _home_pos_sub, &_home_pos);
 	}
+
+	//Collision recovery
+	orb_check(_recovery_stage_sub, &updated);
+
+	if (updated){
+		orb_copy(ORB_ID(impact_recovery_stage), _recovery_stage_sub, &_recovery_stage);
+	}
+
 }
 
 float
@@ -1264,7 +1295,14 @@ MulticopterPositionControl::control_manual()
 
 	if (_control_mode.flag_control_altitude_enabled) {
 		/* set vertical velocity setpoint with throttle stick, remapping of manual.z [0,1] to up and down command [-1,1] */
+
+		//custom : Collision recovery: override the joystick throttle command to 0.5 - in altitude mode this attempts to give zero vertical velocity
+		if(_recovery_stage.recoveryStage >= 1){
+			_manual.z = 0.5f;
+		}
+
 		man_vel_sp(2) = -math::expo_deadzone((_manual.z - 0.5f) * 2.f, _z_vel_man_expo.get(), _hold_dz.get());
+
 
 		/* reset alt setpoint to current altitude if needed */
 		reset_alt_sp();
@@ -2771,6 +2809,12 @@ MulticopterPositionControl::generate_attitude_setpoint()
 
 	/* control throttle directly if no climb rate controller is active */
 	if (!_control_mode.flag_control_climb_rate_enabled) {
+
+		//Collision recovery
+		if(_recovery_stage.recoveryStage >= 1){
+					_manual.z = 0.5f;
+		}
+
 		float thr_val = throttle_curve(_manual.z, _thr_hover.get());
 		_att_sp.thrust = math::min(thr_val, _manual_thr_max.get());
 
@@ -2913,6 +2957,9 @@ MulticopterPositionControl::task_main()
 	_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
 	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 	_home_pos_sub = orb_subscribe(ORB_ID(home_position));
+
+	//Collision recovery
+	_recovery_stage_sub = orb_subscribe(ORB_ID(impact_recovery_stage));
 
 	parameters_update(true);
 
