@@ -16,7 +16,10 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/sensor_gyro.h>
 #include <uORB/topics/actuator_armed.h>
-#include <uORB/topics/control_state.h>
+//#include <uORB/topics/control_state.h>
+
+//Custom: _v_att instead of _ctrl_state
+#include <uORB/topics/vehicle_attitude.h>
 
 #include <uORB/topics/impact_detection.h>
 #include <uORB/topics/impact_recovery_stage.h>

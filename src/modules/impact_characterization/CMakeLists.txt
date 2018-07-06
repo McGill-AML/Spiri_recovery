@@ -4,8 +4,7 @@ px4_add_module(
 	STACK_MAIN 2000
 	COMPILE_FLAGS -Os
 	SRCS
-		impact_characterization.cpp
-		
+		impact_characterization.cpp	
 	DEPENDS
 		platforms__common
 	)

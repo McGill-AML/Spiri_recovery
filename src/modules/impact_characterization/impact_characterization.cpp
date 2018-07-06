@@ -160,29 +160,39 @@ int impact_characterization_thread_main(int argc, char *argv[])
 	// set up subscribers
 	int _sensor_accel_sub = orb_subscribe(ORB_ID(sensor_accel));
 	int _sensor_gyro_sub = orb_subscribe(ORB_ID(sensor_gyro));
-	int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+	//int _ctrl_state_sub = orb_subscribe(ORB_ID(control_state));
+
+	//Custom:_v_att instead of _ctrl_state	
+	int _v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
+
 	int _detection_sub = orb_subscribe(ORB_ID(impact_detection));
 	int _recovery_stage_sub = orb_subscribe(ORB_ID(impact_recovery_stage));
 
 	// declare local copies
 	struct sensor_accel_s             	  _sensor_accel;
 	struct sensor_gyro_s              _sensor_gyro;
-	struct control_state_s			  _ctrl_state;
+	//struct control_state_s			  _ctrl_state;
+	//Custom:_v_att instead of _ctrl_state
+	struct vehicle_attitude_s		_v_att;
+
 	struct impact_detection_s 				 _detection;
 	struct impact_recovery_stage_s  	_recovery_stage;
+
 	// struct debug_s								 _debug;
 
 	// set them to zero initially
 	memset(&_sensor_accel, 0, sizeof(_sensor_accel));	
 	memset(&_sensor_gyro, 0, sizeof(_sensor_gyro));
-	memset(&_ctrl_state, 0, sizeof(_ctrl_state));
+	//Custom:_v_att instead of _ctrl_state
+	memset(&_v_att, 0, sizeof(_v_att));
 	memset(&_detection, 0, sizeof(_detection));
 	memset(&_recovery_stage, 0, sizeof(_recovery_stage));
 
 	// declare update flags
 	bool updated_sensor_accel;
 	bool updated_sensor_gyro;
-	bool updated_ctrl_state;
+	//Custom: _v_att instead of _ctrl_state
+	bool updated_v_att;
 	bool updated_detection;
 	bool updated_recovery_stage;
 	////////////////////////////////////////////////////////////
@@ -210,10 +220,6 @@ int impact_characterization_thread_main(int argc, char *argv[])
 	math::Vector<3> wallNormal_vect(0.0f, 0.0f, 0.0f);
     ////////////////////////////////////////////////////////////
 
-	/////////////// INITIALIZE FUZZY LOGIC PROCESS /////////////
-	//Fuzzy* fuzzy = new Fuzzy();
-	//init_flp_params(fuzzy);
-	
     ////////////////////////////////////////////////////////////
 
                 
@@ -230,7 +236,9 @@ int impact_characterization_thread_main(int argc, char *argv[])
 
 			orb_check(_sensor_accel_sub, &updated_sensor_accel);
 			orb_check(_sensor_gyro_sub, &updated_sensor_gyro);
-			orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//orb_check(_ctrl_state_sub, &updated_ctrl_state);
+			//Custom: _v_att instead of _ctrl_state
+			orb_check(_v_att_sub, &updated_v_att);
 			orb_check(_detection_sub, &updated_detection);
 			orb_check(_recovery_stage_sub, &updated_recovery_stage);
 
@@ -241,8 +249,11 @@ int impact_characterization_thread_main(int argc, char *argv[])
 			if(updated_sensor_gyro){
 				orb_copy(ORB_ID(sensor_gyro), _sensor_gyro_sub, &_sensor_gyro);
 			}			
-			if(updated_ctrl_state){
+			/*if(updated_ctrl_state){
 				orb_copy(ORB_ID(control_state), _ctrl_state_sub, &_ctrl_state);
+			}*/
+			if (updated_v_att) {
+				orb_copy(ORB_ID(vehicle_attitude), _v_att_sub, &_v_att);
 			}
 			if(updated_detection){
 				orb_copy(ORB_ID(impact_detection), _detection_sub, &_detection);
@@ -251,7 +262,9 @@ int impact_characterization_thread_main(int argc, char *argv[])
 				orb_copy(ORB_ID(impact_recovery_stage), _recovery_stage_sub, &_recovery_stage);
 			}
 
-			math::Quaternion q_att(_ctrl_state.q[0], _ctrl_state.q[1], _ctrl_state.q[2], _ctrl_state.q[3]);
+			//Custom: _v_att instead of _ctrl_state
+			math::Quaternion q_att(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
+
 
 			if (_detection.inRecovery){
 				if(!_characterization.accelRefIsComputed){					
