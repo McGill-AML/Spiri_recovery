@@ -71,7 +71,7 @@
 
 //Collision recovery
 #include <uORB/topics/impact_recovery_stage.h>
-#include <uORB/topics/control_state.h>
+
 
 
 #include <float.h>
@@ -156,7 +156,6 @@ private:
 	int		_home_pos_sub; 			/**< home position */
 
 	//Collision recovery
-	int 	_ctrl_state_sub;
 	int 	_recovery_stage_sub;
 
 
@@ -177,7 +176,6 @@ private:
 	struct home_position_s				_home_pos; 				/**< home position */
 
 	//Collision recovery
-	struct control_state_s				_ctrl_state;
 	struct impact_recovery_stage_s 	    	_recovery_stage;
 
 
@@ -457,7 +455,6 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_home_pos_sub(-1),
 
 	//Collision recovery
-	_ctrl_state_sub(-1),
 	_recovery_stage_sub(-1),
 	
 
@@ -475,8 +472,7 @@ MulticopterPositionControl::MulticopterPositionControl() :
 	_pos_sp_triplet{},
 	_local_pos_sp{},
 	_home_pos{},
-	//Collision recovery
-	_ctrl_state{},
+
 	
 	_vel_x_deriv(this, "VELD"),
 	_vel_y_deriv(this, "VELD"),
