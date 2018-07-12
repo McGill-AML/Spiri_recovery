@@ -24,6 +24,7 @@
 #include <math.h>
 #include <errno.h>
 #include <lib/mathlib/mathlib.h>
+#include <matrix/matrix/math.hpp>
 #include <uORB/uORB.h>
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/actuator_armed.h>

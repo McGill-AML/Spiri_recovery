@@ -72,8 +72,6 @@
 //Collision recovery
 #include <uORB/topics/impact_recovery_stage.h>
 
-
-
 #include <float.h>
 #include <lib/ecl/geo/geo.h>
 #include <mathlib/mathlib.h>
