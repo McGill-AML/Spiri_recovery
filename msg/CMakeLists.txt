@@ -133,7 +133,6 @@ set(msg_files
 	impact_detection.msg
 	impact_recovery_stage.msg
 	recovery_control.msg
-	control_state.msg
 	)
 
 if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
