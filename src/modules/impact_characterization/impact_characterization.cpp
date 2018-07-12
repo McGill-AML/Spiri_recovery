@@ -10,14 +10,6 @@
  */
 #include <modules/impact_characterization/impact_characterization.h> 
 
-/*#include <lib/eFLL/Fuzzy.h>
-#include <lib/eFLL/FuzzySet.h> 
-#include <lib/eFLL/FuzzyInput.h> 
-#include <lib/eFLL/FuzzyIO.h> 
-#include <lib/eFLL/FuzzyOutput.h> 
-#include <lib/eFLL/FuzzyRuleConsequent.h>  
-#include <lib/eFLL/FuzzyRuleAntecedent.h>*/
-
 
 // CLASS FUNCTIONS
 
@@ -77,8 +69,6 @@ float rad2deg(const float angle){
 }
 
 // DECLARE CONSTANTS
-const int fuzzyInputCalcCycleDelay_array[4] = {2,0,2,3};
-// const int fuzzyInputCalcCycleDelay_array[4] = {0,200,400,200};
 
 const math::Vector<3> inertialFrameGravityDirection(0.0f,0.0f,1.0f); //Navi's inertial frame is NED
 const math::Vector<3> inertialFrameNegGravityDirection(0.0f,0.0f,-1.0f);
