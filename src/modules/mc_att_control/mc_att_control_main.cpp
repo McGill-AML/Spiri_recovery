@@ -402,25 +402,25 @@ MulticopterAttitudeControl::control_attitude(float dt)
 	qd.normalize();
 
 	/////////////
-	// Custom: for recovery control
+	//Collision recovery
 
 	if (_recovery_stage.recoveryStage >= 1) {
 
 		// 5.66 gives 30 degree angle away from the wall when added to gravity of 9.81
 		float awayness = 5.66f; //1.72f;
-		math::Vector<3> accelRef(awayness*_characterization.wallNormal[0],awayness*_characterization.wallNormal[1],0.0f);
+		Vector3f accelRef(awayness*_characterization.wallNormal[0],awayness*_characterization.wallNormal[1],0.0f);
 
 		//Custom: _v_att instead of _ctrl_state
-		math::Quaternion attitudeQuaternion(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
+		Quatf attitudeQuaternion(_v_att.q[0], _v_att.q[1], _v_att.q[2], _v_att.q[3]);
 		
-		math::Vector<3> rates; // these are the measured body rates
+		Vector3f rates; // these are the measured body rates
 		//Custom: _v_att instead of _ctrl_state
 		rates(0) = _v_att.rollspeed;
 		rates(1) = _v_att.pitchspeed;
 		rates(2) = _v_att.yawspeed;
 
-		math::Vector<3> accelDesired;
-		math::Vector<3> gravity(0.0f, 0.0f, 9.81f);
+		Vector3f accelDesired;
+		Vector3f gravity(0.0f, 0.0f, 9.81f);
 
 		if(_recovery_stage.recoveryStage == 1){
 			accelDesired = gravity - accelRef;
@@ -428,24 +428,24 @@ MulticopterAttitudeControl::control_attitude(float dt)
 			accelDesired = gravity;
 		}
 
-		math::Quaternion zAxisAppended(0.0f, 0.0f, 0.0f, 1.0f);
-		math::Quaternion bodyZAppended = ((attitudeQuaternion * zAxisAppended) * attitudeQuaternion.inversed());
-		math::Vector<3> bodyZ(bodyZAppended(1), bodyZAppended(2), bodyZAppended(3));
-		math::Vector<3> bodyZDesired = accelDesired.normalized();
+		Quatf zAxisAppended(0.0f, 0.0f, 0.0f, 1.0f);
+		Quatf bodyZAppended = ((attitudeQuaternion * zAxisAppended) * attitudeQuaternion.inversed());
+		Vector3f bodyZ(bodyZAppended(1), bodyZAppended(2), bodyZAppended(3));
+		Vector3f bodyZDesired = accelDesired.normalized();
 		// equation (11)
 		float alpha = acosf(bodyZ(0)*bodyZDesired(0) + bodyZ(1)*bodyZDesired(1) + bodyZ(2)*bodyZDesired(2));	
 		//compute axis of rotation in world frame
-	    math::Vector<3> axis(bodyZ(1)*bodyZDesired(2) - bodyZ(2)*bodyZDesired(1), \
+	    Vector3f axis(bodyZ(1)*bodyZDesired(2) - bodyZ(2)*bodyZDesired(1), \
 					      bodyZ(2)*bodyZDesired(0) - bodyZ(0)*bodyZDesired(2), \
 					      bodyZ(0)*bodyZDesired(1) - bodyZ(1)*bodyZDesired(0));
 	    //to be safe
 	    axis.normalize();
 	    //rotate into body frame
-	    math::Quaternion axisAppended(0.0f, axis(0), axis(1), axis(2));
-	    math::Quaternion axisBodyAppended = ((attitudeQuaternion.inversed() * axisAppended) * attitudeQuaternion);
-	    math::Vector<3>  axisBody(axisBodyAppended(1), axisBodyAppended(2), axisBodyAppended(3));
+	    Quatf axisAppended(0.0f, axis(0), axis(1), axis(2));
+	    Quatf axisBodyAppended = ((attitudeQuaternion.inversed() * axisAppended) * attitudeQuaternion);
+	    Vector3f  axisBody(axisBodyAppended(1), axisBodyAppended(2), axisBodyAppended(3));
 	    // compute roll pitch error quaternion
-		math::Quaternion rollPitchQuaternionError(cosf(alpha/2), axisBody(0)*sinf(alpha/2), \
+		Quatf rollPitchQuaternionError(cosf(alpha/2), axisBody(0)*sinf(alpha/2), \
 	    							axisBody(1)*sinf(alpha/2), axisBody(2)*sinf(alpha/2));
 
 		_recovery_control.quatError[0] = rollPitchQuaternionError(0);
@@ -466,7 +466,7 @@ MulticopterAttitudeControl::control_attitude(float dt)
 
 		float bodyRate_R_Desired = 0.0f;
 		// these are the desired body rates
-		matrix::Vector3f bodyRates(bodyRate_P_Desired, bodyRate_Q_Desired, bodyRate_R_Desired);
+		Vector3f bodyRates(bodyRate_P_Desired, bodyRate_Q_Desired, bodyRate_R_Desired);
 		_rates_sp = bodyRates;
 
 		_recovery_control.bodyRatesDesired[0] = bodyRate_P_Desired;
@@ -636,11 +636,11 @@ MulticopterAttitudeControl::control_attitude_rates(float dt)
 			       rates_d_scaled.emult(rates_filtered - _rates_prev_filtered) / dt +
 			       _rate_ff.emult(_rates_sp);
 
-		_rates_prev = rates;
 		_rates_prev_filtered = rates_filtered;
-		_rates_sp_prev = _rates_sp;
 
     }
+    _rates_prev = rates;
+	_rates_sp_prev = _rates_sp;
 
 	/* apply low-pass filtering to the rates for D-term */
 	/*Vector3f rates_filtered(
@@ -716,6 +716,9 @@ MulticopterAttitudeControl::run()
 	_vehicle_status_sub = orb_subscribe(ORB_ID(vehicle_status));
 	_motor_limits_sub = orb_subscribe(ORB_ID(multirotor_motor_limits));
 	_battery_status_sub = orb_subscribe(ORB_ID(battery_status));
+	//Collision recovery
+	_recovery_stage_sub = orb_subscribe(ORB_ID(impact_recovery_stage));
+    _characterization_sub = orb_subscribe(ORB_ID(impact_characterization));
 
 	_gyro_count = math::min(orb_group_count(ORB_ID(sensor_gyro)), MAX_GYRO_COUNT);
 
@@ -788,6 +791,9 @@ MulticopterAttitudeControl::run()
 			vehicle_attitude_poll();
 			sensor_correction_poll();
 			sensor_bias_poll();
+
+			//Collision recovery
+			impact_poll();
 
 			/* Check if we are in rattitude mode and the pilot is above the threshold on pitch
 			 * or roll (yaw can rotate 360 in normal att control).  If both are true don't
@@ -894,6 +900,14 @@ MulticopterAttitudeControl::run()
 
 				int instance;
 				orb_publish_auto(ORB_ID(rate_ctrl_status), &_controller_status_pub, &rate_ctrl_status, &instance, ORB_PRIO_DEFAULT);
+
+				//Collision recovery
+				if (_recovery_control_pub != nullptr) {		
+					orb_publish(ORB_ID(recovery_control), _recovery_control_pub, &_recovery_control);		
+				}		
+				else{		
+					_recovery_control_pub = orb_advertise(ORB_ID(recovery_control), &_recovery_control);
+				}
 			}
 
 			if (_v_control_mode.flag_control_termination_enabled) {
@@ -954,6 +968,9 @@ MulticopterAttitudeControl::run()
 	orb_unsubscribe(_vehicle_status_sub);
 	orb_unsubscribe(_motor_limits_sub);
 	orb_unsubscribe(_battery_status_sub);
+	//Collision recovery
+	orb_unsubscribe(_characterization_sub);
+	orb_unsubscribe(_recovery_stage_sub);
 
 	for (unsigned s = 0; s < _gyro_count; s++) {
 		orb_unsubscribe(_sensor_gyro_sub[s]);

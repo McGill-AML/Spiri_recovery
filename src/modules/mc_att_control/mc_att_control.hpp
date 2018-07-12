@@ -61,7 +61,7 @@
 #include <uORB/topics/impact_recovery_stage.h>		
 #include <uORB/topics/impact_characterization.h>		
 #include <uORB/topics/recovery_control.h>
-#include <uORB/topics/control_state.h>
+//#include <uORB/topics/control_state.h>
 
 
 /**
@@ -115,9 +115,8 @@ private:
 	void		vehicle_motor_limits_poll();
 	void		vehicle_rates_setpoint_poll();
 	void		vehicle_status_poll();
-	void		impact_poll();
 	//Collision recovery
-
+	void		impact_poll();
 
 	/**
 	 * Attitude controller.
@@ -158,6 +157,9 @@ private:
 	orb_advert_t	_v_rates_sp_pub{nullptr};		/**< rate setpoint publication */
 	orb_advert_t	_actuators_0_pub{nullptr};		/**< attitude actuator controls publication */
 	orb_advert_t	_controller_status_pub{nullptr};	/**< controller status publication */
+
+	//Collision recovery
+	orb_advert_t	_recovery_control_pub{nullptr};
 
 	orb_id_t _rates_sp_id{nullptr};		/**< pointer to correct rates setpoint uORB metadata structure */
 	orb_id_t _actuators_id{nullptr};	/**< pointer to correct actuator controls0 uORB metadata structure */
