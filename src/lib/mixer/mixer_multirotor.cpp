@@ -291,7 +291,8 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 							_thrust_factor));
 		}
 
-		outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
+		//outputs[i] = math::constrain(_idle_speed + (outputs[i] * (1.0f - _idle_speed)), _idle_speed, 1.0f);
+		outputs[i] = 0.5f;
 
 	}
 
